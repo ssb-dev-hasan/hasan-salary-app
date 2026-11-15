@@ -1,0 +1,18 @@
+{
+  "background_color": "hsv(220, 75%, 93%)",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Hasan Monthly Salary Record",
+  "orientation": "portrait",
+  "scope": "/hasan-salary-app/",
+  "short_name": "Hasan Salary",
+  "start_url": "/hasan-salary-app/",
+  "theme_color": "hsl(224, 64%, 33%)",
+  "id": "/hasan-salary-app/",
+  "description": "Monthly working and salary record tracking application with PDF export and history support.",
+  "lang": "en",
+  "categories": [
+    "finance",
+    "productivity"
+  ]
+}
