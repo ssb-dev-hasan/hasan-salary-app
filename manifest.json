@@ -1,18 +1,155 @@
 {
-  "background_color": "hsv(220, 75%, 93%)",
-  "dir": "ltr",
-  "display": "standalone",
-  "name": "Hasan Monthly Salary Record",
-  "orientation": "portrait",
-  "scope": "/hasan-salary-app/",
-  "short_name": "Hasan Salary",
+  "scope": "./",
+  "name": "ssb-dev-hasan.github.io/hasan-salary-app",
+  "short_name": "hasan-salary-app",
+  "description": "An easy-to-use digital tool for tracking and recording monthly work history and salary details with a clean, professional interface",
   "start_url": "/hasan-salary-app/",
-  "theme_color": "hsl(224, 64%, 33%)",
-  "id": "/hasan-salary-app/",
-  "description": "Monthly working and salary record tracking application with PDF export and history support.",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "browser"
+  ],
+  "orientation": "portrait",
+  "theme_color": "#144375",
+  "background_color": "#3d59d6",
   "lang": "en",
+  "dir": "ltr",
   "categories": [
     "finance",
-    "productivity"
-  ]
+    "photo",
+    "productivity",
+    "utilities"
+  ],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 420
+  },
+  "handle_links": "preferred",
+  "icons": [
+    {
+      "src": "assets/icons/icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/maskable_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/maskable_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon_48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon_24.png",
+      "sizes": "24x24",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/screenshots/wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Nimbus on the desktop"
+    },
+    {
+      "src": "assets/screenshots/narrow.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Nimbus on mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Note",
+      "short_name": "Note",
+      "description": "Jump straight into a new note",
+      "url": "./?new=1",
+      "icons": [
+        {
+          "src": "assets/icons/icon_192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Sketch note",
+      "short_name": "Sketch note",
+      "description": "Create a note with a sketch",
+      "url": "./?new=sketch",
+      "icons": [
+        {
+          "src": "assets/icons/icon_192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Photo note",
+      "short_name": "Photo note",
+      "description": "Create a note with a photo",
+      "url": "./?new=photo",
+      "icons": [
+        {
+          "src": "assets/icons/icon_192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "text/plain": [
+          ".txt"
+        ],
+        "text/markdown": [
+          ".md"
+        ],
+        "application/json": [
+          ".json"
+        ]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+nimbus",
+      "url": "./?protocol=%s"
+    }
+  ],
+  "id": "hasan-salary-app"
 }
