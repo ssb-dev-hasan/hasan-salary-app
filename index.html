@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HASAN Monthly Working and Salary Record</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        /* A4 Single Page Print & PDF Optimization */
+        @media print {
+            body { background: white; }
+            .no-print { display: none !important; }
+            .print-container { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+        }
+
+        /* Watermark Style */
+        .watermark-bg {
+            position: relative;
+        }
+        .watermark-bg::before {
+            content: "HASAN";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 110px;
+            font-weight: 800;
+            color: rgba(0, 0, 0, 0.03);
+            pointer-events: none;
+            z-index: 0;
+            letter-spacing: 15px;
+        }
+
+        /* Ultra-compact table cells for single page A4 fit */
+        .compact-table th, .compact-table td {
+            padding: 1px 3px !important;
+            font-size: 10px !important;
+            height: 21px !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-6 px-2 sm:px-4">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Top Control Bar (No Print) -->
+        <div class="no-print bg-white p-4 rounded-xl shadow-md mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="bg-blue-600 text-white font-bold px-3 py-1.5 rounded-lg text-sm shadow">HASAN SYSTEM</span>
+                <select id="monthSelector" onchange="switchMonth(this.value)" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <!-- Populated dynamically -->
+                </select>
+                <button onclick="addNewMonth()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow transition flex items-center gap-1">
+                    + Add New Month
+                </button>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="downloadPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center gap-1">
+                    📥 Download PDF
+                </button>
+                <button onclick="saveCurrentData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition">
+                    💾 Save Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Printable Sheet -->
+        <div id="pdfContent" class="print-container bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 watermark-bg overflow-hidden relative">
+            
+            <!-- Header Title -->
+            <div class="bg-blue-900 text-white text-center py-2 rounded font-bold text-sm sm:text-base mb-3 shadow-sm">
+                Monthly Working and Salary Record Template
+            </div>
+
+            <!-- Metadata Section -->
+            <table class="w-full border-collapse border border-gray-400 text-xs mb-3">
+                <tr>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50 w-1/4">Employee Name:</td>
+                    <td class="border border-gray-400 p-1 w-1/4"><input type="text" id="empName" placeholder="Enter Employee Name" class="w-full bg-transparent focus:outline-none" oninput="saveAuto()"></td>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50 w-1/4">Normal Rate (RM):</td>
+                    <td class="border border-gray-400 p-1 w-1/4"><input type="number" id="rateNormal" value="9.00" class="w-full bg-transparent focus:outline-none" oninput="calculateAll()"></td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">ID No:</td>
+                    <td class="border border-gray-400 p-1"><input type="text" id="empId" placeholder="Enter ID Number" class="w-full bg-transparent focus:outline-none" oninput="saveAuto()"></td>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Overtime Rate (RM):</td>
+                    <td class="border border-gray-400 p-1"><input type="number" id="rateOT" value="13.50" class="w-full bg-transparent focus:outline-none" oninput="calculateAll()"></td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Location:</td>
+                    <td class="border border-gray-400 p-1"><input type="text" id="empLoc" placeholder="Enter Location" class="w-full bg-transparent focus:outline-none" oninput="saveAuto()"></td>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Sunday Rate (RM):</td>
+                    <td class="border border-gray-400 p-1"><input type="number" id="rateSun" value="13.50" class="w-full bg-transparent focus:outline-none" oninput="calculateAll()"></td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Dept:</td>
+                    <td class="border border-gray-400 p-1"><input type="text" id="empDept" placeholder="Enter Department" class="w-full bg-transparent focus:outline-none" oninput="saveAuto()"></td>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">PHD Rate (RM/h):</td>
+                    <td class="border border-gray-400 p-1"><input type="number" id="ratePHD" value="13.50" class="w-full bg-transparent focus:outline-none" oninput="calculateAll()"></td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Month / Year:</td>
+                    <td colspan="3" class="border border-gray-400 p-1 font-semibold text-blue-900" id="currentMonthLabel">October 2026</td>
+                </tr>
+            </table>
+
+            <!-- Daily Working Table (31 Days) -->
+            <table class="w-full border-collapse border border-gray-400 text-center compact-table mb-2">
+                <thead>
+                    <tr class="bg-blue-900 text-white font-semibold">
+                        <th class="border border-gray-400 w-16">Date / Day</th>
+                        <th class="border border-gray-400">Normal Hours</th>
+                        <th class="border border-gray-400">Overtime Hours</th>
+                        <th class="border border-gray-400">Sunday Hours</th>
+                        <th class="border border-gray-400">PHD Hours</th>
+                        <th class="border border-gray-400">Daily Total Hours</th>
+                        <th class="border border-gray-400">Daily Total Salary</th>
+                        <th class="border border-gray-400">Remarks</th>
+                    </tr>
+                </thead>
+                <tbody id="daysTableBody">
+                    <!-- Javascript will populate 31 days here -->
+                </tbody>
+            </table>
+
+            <!-- Summary Table -->
+            <table class="w-full border-collapse border border-gray-400 text-xs mb-3">
+                <tr class="bg-blue-900 text-white font-semibold">
+                    <td class="border border-gray-400 p-1 w-1/5">Total Hours</td>
+                    <td class="border border-gray-400 p-1 text-center w-1/5" id="totNormalHrs">0.00</td>
+                    <td class="border border-gray-400 p-1 text-center w-1/5" id="totOTHrs">0.00</td>
+                    <td class="border border-gray-400 p-1 text-center w-1/5" id="totSunHrs">0.00</td>
+                    <td class="border border-gray-400 p-1 text-center w-1/5" id="totPHDHrs">0.00</td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Hourly Rate</td>
+                    <td class="border border-gray-400 p-1 text-center" id="lblRateNormal">9.00</td>
+                    <td class="border border-gray-400 p-1 text-center" id="lblRateOT">13.50</td>
+                    <td class="border border-gray-400 p-1 text-center" id="lblRateSun">13.50</td>
+                    <td class="border border-gray-400 p-1 text-center"></td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="border border-gray-400 p-1 font-bold bg-gray-100 text-right">Sub-total Earnings</td>
+                    <td class="border border-gray-400 p-1 font-bold text-right pr-2" id="subTotalEarnings">0.00</td>
+                </tr>
+                <tr class="bg-blue-900 text-white font-bold text-sm">
+                    <td colspan="4" class="border border-gray-400 p-1.5 text-right">Grand Total Pay (RM)</td>
+                    <td class="border border-gray-400 p-1.5 text-right pr-2 bg-emerald-600 text-white" id="grandTotalPay">0.00</td>
+                </tr>
+            </table>
+
+            <!-- Footer Branding & Copyright -->
+            <div class="text-center pt-2 border-t border-gray-300 text-[10px] text-gray-500">
+                System Brand: <span class="font-bold text-gray-700">HASAN</span> &nbsp;|&nbsp; © HASAN — All Rights Reserved
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let dbData = JSON.parse(localStorage.getItem('hasan_salary_db')) || {
+            "October 2026": {
+                empName: "", empId: "", empLoc: "", empDept: "",
+                rateNormal: 9.00, rateOT: 13.50, rateSun: 13.50, ratePHD: 13.50,
+                days: {}
+            }
+        };
+        let activeMonth = "October 2026";
+
+        function initApp() {
+            renderMonthSelector();
+            loadMonthData(activeMonth);
+        }
+
+        function renderMonthSelector() {
+            const selector = document.getElementById('monthSelector');
+            selector.innerHTML = '';
+            Object.keys(dbData).forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                if(m === activeMonth) opt.selected = true;
+                selector.appendChild(opt);
+            });
+            document.getElementById('currentMonthLabel').textContent = activeMonth;
+        }
+
+        function buildDaysTable() {
+            const tbody = document.getElementById('daysTableBody');
+            tbody.innerHTML = '';
+            for(let i = 1; i <= 31; i++) {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="border border-gray-300 font-medium bg-gray-50">Day ${i}</td>
+                    <td class="border border-gray-300 p-0"><input type="number" step="any" class="w-full h-full text-center bg-transparent focus:bg-blue-50 focus:outline-none" id="n_${i}" oninput="calculateAll()"></td>
+                    <td class="border border-gray-300 p-0"><input type="number" step="any" class="w-full h-full text-center bg-transparent focus:bg-blue-50 focus:outline-none" id="ot_${i}" oninput="calculateAll()"></td>
+                    <td class="border border-gray-300 p-0"><input type="number" step="any" class="w-full h-full text-center bg-transparent focus:bg-blue-50 focus:outline-none" id="sun_${i}" oninput="calculateAll()"></td>
+                    <td class="border border-gray-300 p-0"><input type="number" step="any" class="w-full h-full text-center bg-transparent focus:bg-blue-50 focus:outline-none" id="phd_${i}" oninput="calculateAll()"></td>
+                    <td class="border border-gray-300 text-center font-medium" id="tot_h_${i}"></td>
+                    <td class="border border-gray-300 text-center font-medium" id="tot_s_${i}"></td>
+                    <td class="border border-gray-300 p-0"><input type="text" class="w-full h-full px-1 bg-transparent focus:bg-blue-50 focus:outline-none text-left" id="rem_${i}" oninput="saveAuto()"></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function loadMonthData(monthKey) {
+            activeMonth = monthKey;
+            document.getElementById('currentMonthLabel').textContent = activeMonth;
+            buildDaysTable();
+
+            let data = dbData[activeMonth] || {
+                empName: "", empId: "", empLoc: "", empDept: "",
+                rateNormal: 9.00, rateOT: 13.50, rateSun: 13.50, ratePHD: 13.50,
+                days: {}
+            };
+
+            document.getElementById('empName').value = data.empName || '';
+            document.getElementById('empId').value = data.empId || '';
+            document.getElementById('empLoc').value = data.empLoc || '';
+            document.getElementById('empDept').value = data.empDept || '';
+            
+            document.getElementById('rateNormal').value = data.rateNormal ?? 9.00;
+            document.getElementById('rateOT').value = data.rateOT ?? 13.50;
+            document.getElementById('rateSun').value = data.rateSun ?? 13.50;
+            document.getElementById('ratePHD').value = data.ratePHD ?? 13.50;
+
+            if(data.days) {
+                for(let i = 1; i <= 31; i++) {
+                    if(data.days[i]) {
+                        document.getElementById(`n_${i}`).value = data.days[i].n || '';
+                        document.getElementById(`ot_${i}`).value = data.days[i].ot || '';
+                        document.getElementById(`sun_${i}`).value = data.days[i].sun || '';
+                        document.getElementById(`phd_${i}`).value = data.days[i].phd || '';
+                        document.getElementById(`rem_${i}`).value = data.days[i].rem || '';
+                    }
+                }
+            }
+            calculateAll();
+        }
+
+        function calculateAll() {
+            let rN = parseFloat(document.getElementById('rateNormal').value) || 0;
+            let rOT = parseFloat(document.getElementById('rateOT').value) || 0;
+            let rSun = parseFloat(document.getElementById('rateSun').value) || 0;
+            let rPHD = parseFloat(document.getElementById('ratePHD').value) || 0;
+
+            document.getElementById('lblRateNormal').textContent = rN.toFixed(2);
+            document.getElementById('lblRateOT').textContent = rOT.toFixed(2);
+            document.getElementById('lblRateSun').textContent = rSun.toFixed(2);
+
+            let sumN = 0, sumOT = 0, sumSun = 0, sumPHD = 0;
+            let grandTotal = 0;
+
+            for(let i = 1; i <= 31; i++) {
+                let n = parseFloat(document.getElementById(`n_${i}`).value) || 0;
+                let ot = parseFloat(document.getElementById(`ot_${i}`).value) || 0;
+                let sun = parseFloat(document.getElementById(`sun_${i}`).value) || 0;
+                let phd = parseFloat(document.getElementById(`phd_${i}`).value) || 0;
+
+                sumN += n;
+                sumOT += ot;
+                sumSun += sun;
+                sumPHD += phd;
+
+                let dayHrs = n + ot + sun + phd;
+                let daySal = (n * rN) + (ot * rOT) + (sun * rSun) + (phd * rPHD);
+
+                document.getElementById(`tot_h_${i}`).textContent = dayHrs > 0 ? dayHrs.toFixed(2) : '';
+                document.getElementById(`tot_s_${i}`).textContent = daySal > 0 ? daySal.toFixed(2) : '';
+                grandTotal += daySal;
+            }
+
+            document.getElementById('totNormalHrs').textContent = sumN.toFixed(2);
+            document.getElementById('totOTHrs').textContent = sumOT.toFixed(2);
+            document.getElementById('totSunHrs').textContent = sumSun.toFixed(2);
+            document.getElementById('totPHDHrs').textContent = sumPHD.toFixed(2);
+
+            document.getElementById('subTotalEarnings').textContent = grandTotal.toFixed(2);
+            document.getElementById('grandTotalPay').textContent = grandTotal.toFixed(2);
+
+            saveAuto();
+        }
+
+        function gatherCurrentData() {
+            let days = {};
+            for(let i = 1; i <= 31; i++) {
+                days[i] = {
+                    n: document.getElementById(`n_${i}`).value,
+                    ot: document.getElementById(`ot_${i}`).value,
+                    sun: document.getElementById(`sun_${i}`).value,
+                    phd: document.getElementById(`phd_${i}`).value,
+                    rem: document.getElementById(`rem_${i}`).value
+                };
+            }
+            return {
+                empName: document.getElementById('empName').value,
+                empId: document.getElementById('empId').value,
+                empLoc: document.getElementById('empLoc').value,
+                empDept: document.getElementById('empDept').value,
+                rateNormal: parseFloat(document.getElementById('rateNormal').value) || 0,
+                rateOT: parseFloat(document.getElementById('rateOT').value) || 0,
+                rateSun: parseFloat(document.getElementById('rateSun').value) || 0,
+                ratePHD: parseFloat(document.getElementById('ratePHD').value) || 0,
+                days: days
+            };
+        }
+
+        function saveAuto() {
+            dbData[activeMonth] = gatherCurrentData();
+            localStorage.setItem('hasan_salary_db', JSON.stringify(dbData));
+        }
+
+        function saveCurrentData() {
+            saveAuto();
+            alert('Data saved successfully for ' + activeMonth + '!');
+        }
+
+        function addNewMonth() {
+            let monthName = prompt("Enter Month & Year (e.g., November 2026):");
+            if(monthName && monthName.trim() !== "") {
+                monthName = monthName.trim();
+                if(!dbData[monthName]) {
+                    dbData[monthName] = {
+                        empName: "", empId: "", empLoc: "", empDept: "",
+                        rateNormal: 9.00, rateOT: 13.50, rateSun: 13.50, ratePHD: 13.50,
+                        days: {}
+                    };
+                    localStorage.setItem('hasan_salary_db', JSON.stringify(dbData));
+                }
+                activeMonth = monthName;
+                renderMonthSelector();
+                loadMonthData(activeMonth);
+            }
+        }
+
+        function switchMonth(m) {
+            loadMonthData(m);
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('pdfContent');
+            const opt = {
+                margin: [2, 2, 2, 2],
+                filename: `HASAN_Salary_${activeMonth.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
