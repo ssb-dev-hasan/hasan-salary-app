@@ -1,361 +1,775 @@
+```html
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HASAN Monthly Working and Salary Record</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2pdf.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        
-        /* A4 Single Page Print & PDF Optimization */
-        @media print {
-            body { background: white; }
-            .no-print { display: none !important; }
-            .print-container { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HASAN - Monthly Working & Salary Record</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-        /* Watermark Style */
-        .watermark-bg {
-            position: relative;
-        }
-        .watermark-bg::before {
-            content: "HASAN";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 110px;
-            font-weight: 800;
-            color: rgba(0, 0, 0, 0.03);
-            pointer-events: none;
-            z-index: 0;
-            letter-spacing: 15px;
-        }
+  <!-- html2pdf.js for A4 PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-        /* Ultra-compact table cells for single page A4 fit */
-        .compact-table th, .compact-table td {
-            padding: 1px 3px !important;
-            font-size: 10px !important;
-            height: 21px !important;
-        }
-    </style>
+  <style>
+    body {
+      font-family: 'Inter', 'Hind Siliguri', sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .sheet-viewport {
+      width: 100%;
+      overflow-x: auto;
+      background: #e2e8f0;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .sheet-wrapper {
+      min-width: 820px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .salary-sheet {
+      position: relative;
+      background: #ffffff;
+      border: 2px solid #334155;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      width: 100%;
+    }
+
+    /* Diagonal Repeated HASAN Watermarks */
+    .watermark-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 15;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      opacity: 0.05;
+    }
+
+    .watermark-row {
+      display: flex;
+      gap: 120px;
+      transform: rotate(-30deg);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .watermark-text {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: 0.25em;
+      color: #1e3a8a;
+      text-transform: uppercase;
+    }
+
+    /* Ultra-Compact Excel Table Styling for Single-Page A4 Guarantee */
+    .excel-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 10.5px;
+      line-height: 1.15;
+      position: relative;
+      z-index: 5;
+    }
+
+    .excel-table th,
+    .excel-table td {
+      border: 1px solid #94a3b8;
+      padding: 1.5px 4px;
+      height: 21px;
+      vertical-align: middle;
+    }
+
+    .excel-header-bar {
+      background-color: #2f5597 !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Excel Inline Inputs */
+    .excel-input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      font-size: 10.5px;
+      font-family: 'Inter', sans-serif;
+      color: #0f172a;
+      padding: 0 2px;
+      outline: none;
+      transition: background-color 0.15s;
+    }
+
+    .excel-input:focus {
+      background-color: #fef08a !important;
+      box-shadow: inset 0 0 0 1.5px #2563eb;
+      font-weight: 600;
+    }
+
+    .excel-input-num {
+      text-align: right;
+    }
+
+    .excel-meta-input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px dashed #cbd5e1;
+      background: transparent;
+      font-size: 11px;
+      font-weight: 600;
+      color: #0f172a;
+      padding: 1px 3px;
+      outline: none;
+    }
+
+    .excel-meta-input:focus {
+      background-color: #fef08a;
+      border-bottom-color: #2563eb;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Strict Single-Page A4 Print CSS */
+    @media print {
+      body {
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      header, .bg-white.rounded-2xl.shadow-sm.border {
+        display: none !important;
+      }
+      .sheet-viewport {
+        background: #ffffff !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+      }
+      .sheet-wrapper {
+        max-width: 100% !important;
+        min-width: 100% !important;
+        margin: 0 !important;
+      }
+      .salary-sheet {
+        border: 1px solid #1e293b !important;
+        box-shadow: none !important;
+        padding: 4px !important;
+        width: 100% !important;
+      }
+      .excel-table {
+        font-size: 9.5px !important;
+        line-height: 1.1 !important;
+      }
+      .excel-table th,
+      .excel-table td {
+        padding: 1px 2px !important;
+        height: 18px !important;
+      }
+      .excel-input, .excel-meta-input {
+        font-size: 9.5px !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 4mm;
+      }
+    }
+
+    /* Toast Notification */
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: #1e293b;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1000;
+      right: 20px;
+      bottom: 20px;
+      font-size: 14px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+    }
+    #toast.show {
+      visibility: visible;
+      animation: fadein 0.3s, fadeout 0.3s 2.5s;
+    }
+    @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 20px; opacity: 1; } }
+    @keyframes fadeout { from { bottom: 20px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+  </style>
 </head>
-<body class="min-h-screen py-6 px-2 sm:px-4">
+<body class="min-h-screen flex flex-col bg-slate-100">
 
-    <div class="max-w-4xl mx-auto">
-        <!-- Top Control Bar (No Print) -->
-        <div class="no-print bg-white p-4 rounded-xl shadow-md mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <span class="bg-blue-600 text-white font-bold px-3 py-1.5 rounded-lg text-sm shadow">HASAN SYSTEM</span>
-                <select id="monthSelector" onchange="switchMonth(this.value)" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <!-- Populated dynamically -->
-                </select>
-                <button onclick="addNewMonth()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow transition flex items-center gap-1">
-                    + Add New Month
-                </button>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="downloadPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center gap-1">
-                    📥 Download PDF
-                </button>
-                <button onclick="saveCurrentData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition">
-                    💾 Save Data
-                </button>
-            </div>
+  <!-- Toast Notification Box -->
+  <div id="toast">Action successful</div>
+
+  <!-- HEADER NAVIGATION -->
+  <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="bg-blue-600 p-2.5 rounded-xl shadow-md">
+          <i class="fa-solid fa-file-invoice-dollar text-xl text-white"></i>
         </div>
-
-        <!-- Main Printable Sheet -->
-        <div id="pdfContent" class="print-container bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 watermark-bg overflow-hidden relative">
-            
-            <!-- Header Title -->
-            <div class="bg-blue-900 text-white text-center py-2 rounded font-bold text-sm sm:text-base mb-3 shadow-sm">
-                Monthly Working and Salary Record Template
-            </div>
-
-            <!-- Metadata Section -->
-            <table class="w-full border-collapse border border-gray-400 text-xs mb-3">
-                <tr>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50 w-1/4">Employee Name:</td>
-                    <td class="border border-gray-400 p-1 w-1/4"><input type="text" id="empName" placeholder="Enter Employee Name" class="w-full bg-transparent focus:outline-none" oninput="saveAuto()"></td>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50 w-1/4">Normal Rate (RM):</td>
-                    <td class="border border-gray-400 p-1 w-1/4"><input type="number" id="rateNormal" value="9.00" class="w-full bg-transparent focus:outline-none" oninput="calculateAll()"></td>
-                </tr>
-                <tr>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">ID No:</td>
-                    <td class="border border-gray-400 p-1"><input type="text" id="empId" placeholder="Enter ID Number" class="w-full bg-transparent focus:outline-none" oninput="saveAuto()"></td>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Overtime Rate (RM):</td>
-                    <td class="border border-gray-400 p-1"><input type="number" id="rateOT" value="13.50" class="w-full bg-transparent focus:outline-none" oninput="calculateAll()"></td>
-                </tr>
-                <tr>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Location:</td>
-                    <td class="border border-gray-400 p-1"><input type="text" id="empLoc" placeholder="Enter Location" class="w-full bg-transparent focus:outline-none" oninput="saveAuto()"></td>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Sunday Rate (RM):</td>
-                    <td class="border border-gray-400 p-1"><input type="number" id="rateSun" value="13.50" class="w-full bg-transparent focus:outline-none" oninput="calculateAll()"></td>
-                </tr>
-                <tr>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Dept:</td>
-                    <td class="border border-gray-400 p-1"><input type="text" id="empDept" placeholder="Enter Department" class="w-full bg-transparent focus:outline-none" oninput="saveAuto()"></td>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">PHD Rate (RM/h):</td>
-                    <td class="border border-gray-400 p-1"><input type="number" id="ratePHD" value="13.50" class="w-full bg-transparent focus:outline-none" oninput="calculateAll()"></td>
-                </tr>
-                <tr>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Month / Year:</td>
-                    <td colspan="3" class="border border-gray-400 p-1 font-semibold text-blue-900" id="currentMonthLabel">October 2026</td>
-                </tr>
-            </table>
-
-            <!-- Daily Working Table (31 Days) -->
-            <table class="w-full border-collapse border border-gray-400 text-center compact-table mb-2">
-                <thead>
-                    <tr class="bg-blue-900 text-white font-semibold">
-                        <th class="border border-gray-400 w-16">Date / Day</th>
-                        <th class="border border-gray-400">Normal Hours</th>
-                        <th class="border border-gray-400">Overtime Hours</th>
-                        <th class="border border-gray-400">Sunday Hours</th>
-                        <th class="border border-gray-400">PHD Hours</th>
-                        <th class="border border-gray-400">Daily Total Hours</th>
-                        <th class="border border-gray-400">Daily Total Salary</th>
-                        <th class="border border-gray-400">Remarks</th>
-                    </tr>
-                </thead>
-                <tbody id="daysTableBody">
-                    <!-- Javascript will populate 31 days here -->
-                </tbody>
-            </table>
-
-            <!-- Summary Table -->
-            <table class="w-full border-collapse border border-gray-400 text-xs mb-3">
-                <tr class="bg-blue-900 text-white font-semibold">
-                    <td class="border border-gray-400 p-1 w-1/5">Total Hours</td>
-                    <td class="border border-gray-400 p-1 text-center w-1/5" id="totNormalHrs">0.00</td>
-                    <td class="border border-gray-400 p-1 text-center w-1/5" id="totOTHrs">0.00</td>
-                    <td class="border border-gray-400 p-1 text-center w-1/5" id="totSunHrs">0.00</td>
-                    <td class="border border-gray-400 p-1 text-center w-1/5" id="totPHDHrs">0.00</td>
-                </tr>
-                <tr>
-                    <td class="border border-gray-400 p-1 font-semibold bg-gray-50">Hourly Rate</td>
-                    <td class="border border-gray-400 p-1 text-center" id="lblRateNormal">9.00</td>
-                    <td class="border border-gray-400 p-1 text-center" id="lblRateOT">13.50</td>
-                    <td class="border border-gray-400 p-1 text-center" id="lblRateSun">13.50</td>
-                    <td class="border border-gray-400 p-1 text-center"></td>
-                </tr>
-                <tr>
-                    <td colspan="4" class="border border-gray-400 p-1 font-bold bg-gray-100 text-right">Sub-total Earnings</td>
-                    <td class="border border-gray-400 p-1 font-bold text-right pr-2" id="subTotalEarnings">0.00</td>
-                </tr>
-                <tr class="bg-blue-900 text-white font-bold text-sm">
-                    <td colspan="4" class="border border-gray-400 p-1.5 text-right">Grand Total Pay (RM)</td>
-                    <td class="border border-gray-400 p-1.5 text-right pr-2 bg-emerald-600 text-white" id="grandTotalPay">0.00</td>
-                </tr>
-            </table>
-
-            <!-- Footer Branding & Copyright -->
-            <div class="text-center pt-2 border-t border-gray-300 text-[10px] text-gray-500">
-                System Brand: <span class="font-bold text-gray-700">HASAN</span> &nbsp;|&nbsp; © HASAN — All Rights Reserved
-            </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-wide text-white flex items-center gap-2">
+            HASAN <span class="text-xs bg-blue-500/30 text-blue-200 px-2 py-0.5 rounded-full font-medium border border-blue-400/30">Salary Pro</span>
+          </h1>
+          <p class="text-xs text-blue-200">Monthly Working & Salary Record System</p>
         </div>
+      </div>
+
+      <!-- Navigation Tabs & Actions -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button id="tabSheetBtn" onclick="switchTab('sheet')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow transition flex items-center gap-2">
+          <i class="fa-solid fa-table"></i> Active Sheet
+        </button>
+        <button id="tabHistoryBtn" onclick="switchTab('history')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm rounded-xl shadow transition flex items-center gap-2 border border-slate-700">
+          <i class="fa-solid fa-clock-rotate-left"></i> History Cards (<span id="historyCount">0</span>)
+        </button>
+        <button onclick="addNewMonthSheet()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow transition flex items-center gap-2">
+          <i class="fa-solid fa-calendar-plus"></i> Add New Month
+        </button>
+      </div>
     </div>
+  </header>
 
-    <!-- JavaScript Logic -->
-    <script>
-        let dbData = JSON.parse(localStorage.getItem('hasan_salary_db')) || {
-            "October 2026": {
-                empName: "", empId: "", empLoc: "", empDept: "",
-                rateNormal: 9.00, rateOT: 13.50, rateSun: 13.50, ratePHD: 13.50,
-                days: {}
-            }
-        };
-        let activeMonth = "October 2026";
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-6">
 
-        function initApp() {
-            renderMonthSelector();
-            loadMonthData(activeMonth);
+    <!-- ==================== VIEW 1: SHEET EDITOR ==================== -->
+    <section id="editorSection" class="space-y-4">
+
+      <!-- Action Toolbar -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Current Month:</span>
+          <span id="activeMonthDisplay" class="px-3 py-1 bg-blue-50 text-blue-700 font-bold text-sm rounded-lg border border-blue-200">October 2026</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="saveCurrentMonth()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center gap-2">
+            <i class="fa-solid fa-floppy-disk"></i> Save to History
+          </button>
+          <button onclick="downloadPDF()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center gap-2">
+            <i class="fa-solid fa-file-pdf"></i> Download PDF
+          </button>
+          <button onclick="clearCurrentSheet()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-xl transition" title="Clear Sheet">
+            <i class="fa-solid fa-rotate-right"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- PDF / Sheet Container -->
+      <div class="sheet-viewport">
+        <div class="sheet-wrapper">
+          <div id="pdfContent" class="salary-sheet p-3 sm:p-4 bg-white">
+
+            <!-- Watermark Layer -->
+            <div class="watermark-layer" aria-hidden="true">
+              <div class="watermark-row">
+                <span class="watermark-text">HASAN</span>
+                <span class="watermark-text">HASAN</span>
+                <span class="watermark-text">HASAN</span>
+              </div>
+              <div class="watermark-row">
+                <span class="watermark-text">HASAN</span>
+                <span class="watermark-text">HASAN</span>
+                <span class="watermark-text">HASAN</span>
+              </div>
+              <div class="watermark-row">
+                <span class="watermark-text">HASAN</span>
+                <span class="watermark-text">HASAN</span>
+                <span class="watermark-text">HASAN</span>
+              </div>
+            </div>
+
+            <!-- Sheet Header Title -->
+            <div class="mb-2.5 bg-[#2f5597] text-white py-1.5 px-3 rounded text-center font-bold text-sm sm:text-base tracking-wide shadow-xs">
+              Monthly Working and Salary Record Template
+            </div>
+
+            <!-- Metadata Top Box -->
+            <table class="excel-table mb-2">
+              <colgroup>
+                <col style="width: 17%;">
+                <col style="width: 33%;">
+                <col style="width: 17%;">
+                <col style="width: 33%;">
+              </colgroup>
+              <tbody>
+                <tr>
+                  <td class="font-bold bg-slate-50">Employee Name:</td>
+                  <td><input type="text" id="metaEmpName" class="excel-meta-input" placeholder="Enter Employee Name" /></td>
+                  <td class="font-bold bg-slate-50">Normal Rate (RM):</td>
+                  <td><input type="number" id="rateNormal" class="excel-meta-input excel-input-num" value="9.00" step="0.01" oninput="calculateAll()" /></td>
+                </tr>
+                <tr>
+                  <td class="font-bold bg-slate-50">ID No:</td>
+                  <td><input type="text" id="metaIdNo" class="excel-meta-input" placeholder="Enter ID Number" /></td>
+                  <td class="font-bold bg-slate-50">Overtime Rate (RM):</td>
+                  <td><input type="number" id="rateOvertime" class="excel-meta-input excel-input-num" value="13.50" step="0.01" oninput="calculateAll()" /></td>
+                </tr>
+                <tr>
+                  <td class="font-bold bg-slate-50">Location:</td>
+                  <td><input type="text" id="metaLocation" class="excel-meta-input" placeholder="Enter Location" /></td>
+                  <td class="font-bold bg-slate-50">Sunday Rate (RM):</td>
+                  <td><input type="number" id="rateSunday" class="excel-meta-input excel-input-num" value="13.50" step="0.01" oninput="calculateAll()" /></td>
+                </tr>
+                <tr>
+                  <td class="font-bold bg-slate-50">Dept:</td>
+                  <td><input type="text" id="metaDept" class="excel-meta-input" placeholder="Enter Department" /></td>
+                  <td class="font-bold bg-slate-50">PHD Rate (RM/h):</td>
+                  <td><input type="number" id="ratePhd" class="excel-meta-input excel-input-num" value="13.50" step="0.01" oninput="calculateAll()" /></td>
+                </tr>
+                <tr>
+                  <td class="font-bold bg-slate-50">Month / Year:</td>
+                  <td colspan="3"><input type="text" id="metaMonthYear" class="excel-meta-input font-bold text-blue-900" value="October 2026" oninput="updateMonthDisplay(this.value)" /></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- 31 Days Daily Working Table -->
+            <table class="excel-table mb-2">
+              <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 14%;">
+                <col style="width: 16%;">
+              </colgroup>
+              <thead>
+                <tr class="excel-header-bar">
+                  <th>Date / Day</th>
+                  <th>Normal Hours</th>
+                  <th>Overtime Hours</th>
+                  <th>Sunday Hours</th>
+                  <th>PHD Hours</th>
+                  <th>Daily Total Hours</th>
+                  <th>Daily Total Salary</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="daysTableBody">
+                <!-- Dynamically populated 31 days with blank default values -->
+              </tbody>
+            </table>
+
+            <!-- Summary Footer Table -->
+            <table class="excel-table mb-2">
+              <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 14%;">
+                <col style="width: 16%;">
+              </colgroup>
+              <tbody>
+                <tr>
+                  <td class="excel-header-bar font-bold">Total Hours</td>
+                  <td id="totNormalHours" class="text-right font-bold bg-slate-50">0.00</td>
+                  <td id="totOvertimeHours" class="text-right font-bold bg-slate-50">0.00</td>
+                  <td id="totSundayHours" class="text-right font-bold bg-slate-50">0.00</td>
+                  <td id="totPhdHours" class="text-right font-bold bg-slate-50">0.00</td>
+                  <td colspan="3" class="bg-slate-100"></td>
+                </tr>
+                <tr>
+                  <td class="excel-header-bar font-bold">Hourly Rate</td>
+                  <td class="text-right bg-slate-50"><span id="displayRateNormal">9.00</span></td>
+                  <td class="text-right bg-slate-50"><span id="displayRateOvertime">13.50</span></td>
+                  <td class="text-right bg-slate-50"><span id="displayRateSunday">13.50</span></td>
+                  <td colspan="4" class="bg-slate-50"></td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="excel-header-bar text-left font-bold pl-2">Sub-total Earnings</td>
+                  <td id="subTotalEarnings" colspan="3" class="text-right font-bold bg-blue-50 text-blue-900 text-xs">0.00</td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="bg-blue-900 text-white text-left font-bold pl-2">Grand Total Pay (RM)</td>
+                  <td id="grandTotalPay" colspan="3" class="text-right font-bold bg-emerald-100 text-emerald-900 text-sm">0.00</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Footer Copyright & Watermark Notice -->
+            <div class="pt-2 border-t border-slate-300 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-medium">
+              <div>System Brand: <strong class="text-blue-900">HASAN</strong></div>
+              <div>© HASAN — All Rights Reserved</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: HISTORY CARDS ==================== -->
+    <section id="historySection" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-800">Saved Monthly History Cards</h2>
+          <p class="text-xs text-slate-500">Access, edit, or download PDF for any saved month record.</p>
+        </div>
+        <button onclick="addNewMonthSheet()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center gap-2">
+          <i class="fa-solid fa-calendar-plus"></i> Add New Month
+        </button>
+      </div>
+
+      <div id="historyCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Dynamically populated history cards -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let currentEditId = null;
+    let historyRecords = [];
+
+    window.onload = function() {
+      buildDaysTable();
+      loadHistoryFromStorage();
+      calculateAll();
+    };
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.className = "show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    function switchTab(tab) {
+      const sheetSec = document.getElementById('editorSection');
+      const histSec = document.getElementById('historySection');
+      const tabSheet = document.getElementById('tabSheetBtn');
+      const tabHist = document.getElementById('tabHistoryBtn');
+
+      if (tab === 'sheet') {
+        sheetSec.classList.remove('hidden');
+        histSec.classList.add('hidden');
+        tabSheet.className = "px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-xl shadow transition flex items-center gap-2";
+        tabHist.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm rounded-xl shadow transition flex items-center gap-2 border border-slate-700";
+      } else {
+        sheetSec.classList.add('hidden');
+        histSec.classList.remove('hidden');
+        tabHist.className = "px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-xl shadow transition flex items-center gap-2";
+        tabSheet.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm rounded-xl shadow transition flex items-center gap-2 border border-slate-700";
+        renderHistoryCards();
+      }
+    }
+
+    function updateMonthDisplay(val) {
+      document.getElementById('activeMonthDisplay').innerText = val || 'Select Month';
+    }
+
+    function buildDaysTable(data = {}) {
+      const tbody = document.getElementById('daysTableBody');
+      tbody.innerHTML = '';
+      for (let i = 1; i <= 31; i++) {
+        const dayData = data[i] || { normal: '', ot: '', sun: '', phd: '', remarks: '' };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="font-bold bg-slate-50 text-center">Day ${i}</td>
+          <td><input type="number" step="0.1" class="excel-input excel-input-num day-normal" data-day="${i}" value="${dayData.normal}" placeholder="" oninput="calculateAll()" /></td>
+          <td><input type="number" step="0.1" class="excel-input excel-input-num day-ot" data-day="${i}" value="${dayData.ot}" placeholder="" oninput="calculateAll()" /></td>
+          <td><input type="number" step="0.1" class="excel-input excel-input-num day-sun" data-day="${i}" value="${dayData.sun}" placeholder="" oninput="calculateAll()" /></td>
+          <td><input type="number" step="0.1" class="excel-input excel-input-num day-phd" data-day="${i}" value="${dayData.phd}" placeholder="" oninput="calculateAll()" /></td>
+          <td class="text-right font-medium bg-slate-50/50 day-tot-hours" id="dayHours_${i}">0.00</td>
+          <td class="text-right font-medium bg-slate-50/50 day-tot-salary" id="daySal_${i}">0.00</td>
+          <td><input type="text" class="excel-input day-remarks" data-day="${i}" value="${dayData.remarks || ''}" placeholder="" /></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function calculateAll() {
+      const rNormal = parseFloat(document.getElementById('rateNormal').value) || 0;
+      const rOt = parseFloat(document.getElementById('rateOvertime').value) || 0;
+      const rSun = parseFloat(document.getElementById('rateSunday').value) || 0;
+      const rPhd = parseFloat(document.getElementById('ratePhd').value) || 0;
+
+      document.getElementById('displayRateNormal').innerText = rNormal.toFixed(2);
+      document.getElementById('displayRateOvertime').innerText = rOt.toFixed(2);
+      document.getElementById('displayRateSunday').innerText = rSun.toFixed(2);
+
+      let sumNormH = 0, sumOtH = 0, sumSunH = 0, sumPhdH = 0;
+      let totalEarnings = 0;
+
+      for (let i = 1; i <= 31; i++) {
+        const normInput = document.querySelector(`.day-normal[data-day="${i}"]`);
+        const otInput = document.querySelector(`.day-ot[data-day="${i}"]`);
+        const sunInput = document.querySelector(`.day-sun[data-day="${i}"]`);
+        const phdInput = document.querySelector(`.day-phd[data-day="${i}"]`);
+
+        const nVal = parseFloat(normInput ? normInput.value : 0) || 0;
+        const oVal = parseFloat(otInput ? otInput.value : 0) || 0;
+        const sVal = parseFloat(sunInput ? sunInput.value : 0) || 0;
+        const pVal = parseFloat(phdInput ? phdInput.value : 0) || 0;
+
+        sumNormH += nVal;
+        sumOtH += oVal;
+        sumSunH += sVal;
+        sumPhdH += pVal;
+
+        const dayTotH = nVal + oVal + sVal + pVal;
+        const dayTotS = (nVal * rNormal) + (oVal * rOt) + (sVal * rSun) + (pVal * rPhd);
+
+        totalEarnings += dayTotS;
+
+        const hCell = document.getElementById(`dayHours_${i}`);
+        const sCell = document.getElementById(`daySal_${i}`);
+        if (hCell) hCell.innerText = dayTotH > 0 ? dayTotH.toFixed(2) : '';
+        if (sCell) sCell.innerText = dayTotS > 0 ? dayTotS.toFixed(2) : '';
+      }
+
+      document.getElementById('totNormalHours').innerText = sumNormH.toFixed(2);
+      document.getElementById('totOvertimeHours').innerText = sumOtH.toFixed(2);
+      document.getElementById('totSundayHours').innerText = sumSunH.toFixed(2);
+      document.getElementById('totPhdHours').innerText = sumPhdH.toFixed(2);
+
+      document.getElementById('subTotalEarnings').innerText = totalEarnings.toFixed(2);
+      document.getElementById('grandTotalPay').innerText = totalEarnings.toFixed(2);
+    }
+
+    function gatherCurrentSheetData() {
+      const days = {};
+      for (let i = 1; i <= 31; i++) {
+        const n = document.querySelector(`.day-normal[data-day="${i}"]`).value;
+        const o = document.querySelector(`.day-ot[data-day="${i}"]`).value;
+        const s = document.querySelector(`.day-sun[data-day="${i}"]`).value;
+        const p = document.querySelector(`.day-phd[data-day="${i}"]`).value;
+        const r = document.querySelector(`.day-remarks[data-day="${i}"]`).value;
+        if (n || o || s || p || r) {
+          days[i] = { normal: n, ot: o, sun: s, phd: p, remarks: r };
         }
+      }
 
-        function renderMonthSelector() {
-            const selector = document.getElementById('monthSelector');
-            selector.innerHTML = '';
-            Object.keys(dbData).forEach(m => {
-                let opt = document.createElement('option');
-                opt.value = m;
-                opt.textContent = m;
-                if(m === activeMonth) opt.selected = true;
-                selector.appendChild(opt);
-            });
-            document.getElementById('currentMonthLabel').textContent = activeMonth;
+      return {
+        id: currentEditId || 'record_' + Date.now(),
+        empName: document.getElementById('metaEmpName').value,
+        idNo: document.getElementById('metaIdNo').value,
+        location: document.getElementById('metaLocation').value,
+        dept: document.getElementById('metaDept').value,
+        monthYear: document.getElementById('metaMonthYear').value,
+        rateNormal: document.getElementById('rateNormal').value,
+        rateOvertime: document.getElementById('rateOvertime').value,
+        rateSunday: document.getElementById('rateSunday').value,
+        ratePhd: document.getElementById('ratePhd').value,
+        days: days,
+        updatedAt: new Date().toLocaleDateString()
+      };
+    }
+
+    function loadSheetData(rec) {
+      currentEditId = rec.id;
+      document.getElementById('metaEmpName').value = rec.empName || '';
+      document.getElementById('metaIdNo').value = rec.idNo || '';
+      document.getElementById('metaLocation').value = rec.location || '';
+      document.getElementById('metaDept').value = rec.dept || '';
+      document.getElementById('metaMonthYear').value = rec.monthYear || 'October 2026';
+      updateMonthDisplay(rec.monthYear || 'October 2026');
+
+      document.getElementById('rateNormal').value = rec.rateNormal || '9.00';
+      document.getElementById('rateOvertime').value = rec.rateOvertime || '13.50';
+      document.getElementById('rateSunday').value = rec.rateSunday || '13.50';
+      document.getElementById('ratePhd').value = rec.ratePhd || '13.50';
+
+      buildDaysTable(rec.days || {});
+      calculateAll();
+    }
+
+    function clearCurrentSheet() {
+      currentEditId = null;
+      document.getElementById('metaEmpName').value = '';
+      document.getElementById('metaIdNo').value = '';
+      document.getElementById('metaLocation').value = '';
+      document.getElementById('metaDept').value = '';
+      document.getElementById('metaMonthYear').value = 'October 2026';
+      updateMonthDisplay('October 2026');
+      document.getElementById('rateNormal').value = '9.00';
+      document.getElementById('rateOvertime').value = '13.50';
+      document.getElementById('rateSunday').value = '13.50';
+      document.getElementById('ratePhd').value = '13.50';
+      buildDaysTable();
+      calculateAll();
+      showToast('Sheet reset to blank.');
+    }
+
+    function addNewMonthSheet() {
+      clearCurrentSheet();
+      switchTab('sheet');
+      showToast('New blank month sheet opened.');
+    }
+
+    function saveCurrentMonth() {
+      const record = gatherCurrentSheetData();
+      const existingIndex = historyRecords.findIndex(r => r.id === record.id);
+      if (existingIndex >= 0) {
+        historyRecords[existingIndex] = record;
+      } else {
+        historyRecords.unshift(record);
+      }
+      saveHistoryToStorage();
+      showToast('Month saved successfully to History!');
+    }
+
+    function deleteRecord(id, event) {
+      event.stopPropagation();
+      if (confirm('Are you sure you want to delete this history card?')) {
+        historyRecords = historyRecords.filter(r => r.id !== id);
+        saveHistoryToStorage();
+        renderHistoryCards();
+        showToast('History card deleted.');
+      }
+    }
+
+    function editRecord(id) {
+      const record = historyRecords.find(r => r.id === id);
+      if (record) {
+        loadSheetData(record);
+        switchTab('sheet');
+        showToast(`Loaded ${record.monthYear} for editing.`);
+      }
+    }
+
+    function downloadPDFFromHistory(id, event) {
+      event.stopPropagation();
+      const record = historyRecords.find(r => r.id === id);
+      if (record) {
+        loadSheetData(record);
+        switchTab('sheet');
+        setTimeout(() => { downloadPDF(); }, 400);
+      }
+    }
+
+    function saveHistoryToStorage() {
+      localStorage.setItem('hasan_salary_history', JSON.stringify(historyRecords));
+      document.getElementById('historyCount').innerText = historyRecords.length;
+    }
+
+    function loadHistoryFromStorage() {
+      const data = localStorage.getItem('hasan_salary_history');
+      if (data) {
+        try {
+          historyRecords = JSON.parse(data);
+        } catch(e) {
+          historyRecords = [];
         }
+      }
+      document.getElementById('historyCount').innerText = historyRecords.length;
+    }
 
-        function buildDaysTable() {
-            const tbody = document.getElementById('daysTableBody');
-            tbody.innerHTML = '';
-            for(let i = 1; i <= 31; i++) {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="border border-gray-300 font-medium bg-gray-50">Day ${i}</td>
-                    <td class="border border-gray-300 p-0"><input type="number" step="any" class="w-full h-full text-center bg-transparent focus:bg-blue-50 focus:outline-none" id="n_${i}" oninput="calculateAll()"></td>
-                    <td class="border border-gray-300 p-0"><input type="number" step="any" class="w-full h-full text-center bg-transparent focus:bg-blue-50 focus:outline-none" id="ot_${i}" oninput="calculateAll()"></td>
-                    <td class="border border-gray-300 p-0"><input type="number" step="any" class="w-full h-full text-center bg-transparent focus:bg-blue-50 focus:outline-none" id="sun_${i}" oninput="calculateAll()"></td>
-                    <td class="border border-gray-300 p-0"><input type="number" step="any" class="w-full h-full text-center bg-transparent focus:bg-blue-50 focus:outline-none" id="phd_${i}" oninput="calculateAll()"></td>
-                    <td class="border border-gray-300 text-center font-medium" id="tot_h_${i}"></td>
-                    <td class="border border-gray-300 text-center font-medium" id="tot_s_${i}"></td>
-                    <td class="border border-gray-300 p-0"><input type="text" class="w-full h-full px-1 bg-transparent focus:bg-blue-50 focus:outline-none text-left" id="rem_${i}" oninput="saveAuto()"></td>
-                `;
-                tbody.appendChild(tr);
-            }
-        }
+    function renderHistoryCards() {
+      const container = document.getElementById('historyCardsContainer');
+      container.innerHTML = '';
 
-        function loadMonthData(monthKey) {
-            activeMonth = monthKey;
-            document.getElementById('currentMonthLabel').textContent = activeMonth;
-            buildDaysTable();
+      if (historyRecords.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl p-8 text-center border border-slate-200">
+            <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-3"></i>
+            <p class="text-slate-600 font-medium">No saved monthly records found.</p>
+            <p class="text-xs text-slate-400 mt-1">Click "Save to History" from the active sheet or create a new month.</p>
+          </div>
+        `;
+        return;
+      }
 
-            let data = dbData[activeMonth] || {
-                empName: "", empId: "", empLoc: "", empDept: "",
-                rateNormal: 9.00, rateOT: 13.50, rateSun: 13.50, ratePHD: 13.50,
-                days: {}
-            };
+      historyRecords.forEach(rec => {
+        let totalH = 0;
+        let totalEarn = 0;
+        const rNorm = parseFloat(rec.rateNormal) || 0;
+        const rOt = parseFloat(rec.rateOvertime) || 0;
+        const rSun = parseFloat(rec.rateSunday) || 0;
+        const rPhd = parseFloat(rec.ratePhd) || 0;
 
-            document.getElementById('empName').value = data.empName || '';
-            document.getElementById('empId').value = data.empId || '';
-            document.getElementById('empLoc').value = data.empLoc || '';
-            document.getElementById('empDept').value = data.empDept || '';
-            
-            document.getElementById('rateNormal').value = data.rateNormal ?? 9.00;
-            document.getElementById('rateOT').value = data.rateOT ?? 13.50;
-            document.getElementById('rateSun').value = data.rateSun ?? 13.50;
-            document.getElementById('ratePHD').value = data.ratePHD ?? 13.50;
+        Object.values(rec.days || {}).forEach(d => {
+          const n = parseFloat(d.normal) || 0;
+          const o = parseFloat(d.ot) || 0;
+          const s = parseFloat(d.sun) || 0;
+          const p = parseFloat(d.phd) || 0;
+          totalH += (n + o + s + p);
+          totalEarn += (n * rNorm) + (o * rOt) + (s * rSun) + (p * rPhd);
+        });
 
-            if(data.days) {
-                for(let i = 1; i <= 31; i++) {
-                    if(data.days[i]) {
-                        document.getElementById(`n_${i}`).value = data.days[i].n || '';
-                        document.getElementById(`ot_${i}`).value = data.days[i].ot || '';
-                        document.getElementById(`sun_${i}`).value = data.days[i].sun || '';
-                        document.getElementById(`phd_${i}`).value = data.days[i].phd || '';
-                        document.getElementById(`rem_${i}`).value = data.days[i].rem || '';
-                    }
-                }
-            }
-            calculateAll();
-        }
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between";
+        card.onclick = () => editRecord(rec.id);
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">${rec.monthYear || 'Month'}</span>
+              <span class="text-xs text-slate-400">Updated: ${rec.updatedAt || ''}</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">${rec.empName || 'Unnamed Employee'}</h3>
+            <p class="text-xs text-slate-500 mb-4">ID: ${rec.idNo || 'N/A'} | Dept: ${rec.dept || 'N/A'}</p>
+            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl mb-4 text-xs">
+              <div><span class="text-slate-500">Total Hours:</span> <strong class="text-slate-800">${totalH.toFixed(2)}</strong></div>
+              <div><span class="text-slate-500">Grand Total:</span> <strong class="text-emerald-700">RM ${totalEarn.toFixed(2)}</strong></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <button onclick="downloadPDFFromHistory('${rec.id}', event)" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-pdf"></i> PDF
+            </button>
+            <button onclick="editRecord('${rec.id}')" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg transition flex items-center gap-1.5">
+              <i class="fa-solid fa-pen-to-square"></i> Edit
+            </button>
+            <button onclick="deleteRecord('${rec.id}', event)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg transition" title="Delete">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
 
-        function calculateAll() {
-            let rN = parseFloat(document.getElementById('rateNormal').value) || 0;
-            let rOT = parseFloat(document.getElementById('rateOT').value) || 0;
-            let rSun = parseFloat(document.getElementById('rateSun').value) || 0;
-            let rPHD = parseFloat(document.getElementById('ratePHD').value) || 0;
+    function downloadPDF() {
+      const element = document.getElementById('pdfContent');
+      const empName = document.getElementById('metaEmpName').value.trim() || 'Salary_Record';
+      const monthYear = document.getElementById('metaMonthYear').value.trim() || 'Month';
+      const filename = `HASAN_Salary_${empName.replace(/\s+/g, '_')}_${monthYear.replace(/\s+/g, '_')}.pdf`;
 
-            document.getElementById('lblRateNormal').textContent = rN.toFixed(2);
-            document.getElementById('lblRateOT').textContent = rOT.toFixed(2);
-            document.getElementById('lblRateSun').textContent = rSun.toFixed(2);
+      const opt = {
+        margin:       [2, 2, 2, 2],
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
+      };
 
-            let sumN = 0, sumOT = 0, sumSun = 0, sumPHD = 0;
-            let grandTotal = 0;
-
-            for(let i = 1; i <= 31; i++) {
-                let n = parseFloat(document.getElementById(`n_${i}`).value) || 0;
-                let ot = parseFloat(document.getElementById(`ot_${i}`).value) || 0;
-                let sun = parseFloat(document.getElementById(`sun_${i}`).value) || 0;
-                let phd = parseFloat(document.getElementById(`phd_${i}`).value) || 0;
-
-                sumN += n;
-                sumOT += ot;
-                sumSun += sun;
-                sumPHD += phd;
-
-                let dayHrs = n + ot + sun + phd;
-                let daySal = (n * rN) + (ot * rOT) + (sun * rSun) + (phd * rPHD);
-
-                document.getElementById(`tot_h_${i}`).textContent = dayHrs > 0 ? dayHrs.toFixed(2) : '';
-                document.getElementById(`tot_s_${i}`).textContent = daySal > 0 ? daySal.toFixed(2) : '';
-                grandTotal += daySal;
-            }
-
-            document.getElementById('totNormalHrs').textContent = sumN.toFixed(2);
-            document.getElementById('totOTHrs').textContent = sumOT.toFixed(2);
-            document.getElementById('totSunHrs').textContent = sumSun.toFixed(2);
-            document.getElementById('totPHDHrs').textContent = sumPHD.toFixed(2);
-
-            document.getElementById('subTotalEarnings').textContent = grandTotal.toFixed(2);
-            document.getElementById('grandTotalPay').textContent = grandTotal.toFixed(2);
-
-            saveAuto();
-        }
-
-        function gatherCurrentData() {
-            let days = {};
-            for(let i = 1; i <= 31; i++) {
-                days[i] = {
-                    n: document.getElementById(`n_${i}`).value,
-                    ot: document.getElementById(`ot_${i}`).value,
-                    sun: document.getElementById(`sun_${i}`).value,
-                    phd: document.getElementById(`phd_${i}`).value,
-                    rem: document.getElementById(`rem_${i}`).value
-                };
-            }
-            return {
-                empName: document.getElementById('empName').value,
-                empId: document.getElementById('empId').value,
-                empLoc: document.getElementById('empLoc').value,
-                empDept: document.getElementById('empDept').value,
-                rateNormal: parseFloat(document.getElementById('rateNormal').value) || 0,
-                rateOT: parseFloat(document.getElementById('rateOT').value) || 0,
-                rateSun: parseFloat(document.getElementById('rateSun').value) || 0,
-                ratePHD: parseFloat(document.getElementById('ratePHD').value) || 0,
-                days: days
-            };
-        }
-
-        function saveAuto() {
-            dbData[activeMonth] = gatherCurrentData();
-            localStorage.setItem('hasan_salary_db', JSON.stringify(dbData));
-        }
-
-        function saveCurrentData() {
-            saveAuto();
-            alert('Data saved successfully for ' + activeMonth + '!');
-        }
-
-        function addNewMonth() {
-            let monthName = prompt("Enter Month & Year (e.g., November 2026):");
-            if(monthName && monthName.trim() !== "") {
-                monthName = monthName.trim();
-                if(!dbData[monthName]) {
-                    dbData[monthName] = {
-                        empName: "", empId: "", empLoc: "", empDept: "",
-                        rateNormal: 9.00, rateOT: 13.50, rateSun: 13.50, ratePHD: 13.50,
-                        days: {}
-                    };
-                    localStorage.setItem('hasan_salary_db', JSON.stringify(dbData));
-                }
-                activeMonth = monthName;
-                renderMonthSelector();
-                loadMonthData(activeMonth);
-            }
-        }
-
-        function switchMonth(m) {
-            loadMonthData(m);
-        }
-
-        function downloadPDF() {
-            const element = document.getElementById('pdfContent');
-            const opt = {
-                margin: [2, 2, 2, 2],
-                filename: `HASAN_Salary_${activeMonth.replace(/\s+/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().from(element).set(opt).save();
-        }
-
-        window.onload = initApp;
-    </script>
+      showToast('Generating Single-Page A4 PDF...');
+      html2pdf().from(element).set(opt).save().then(() => {
+        showToast('PDF downloaded successfully!');
+      });
+    }
+  </script>
 </body>
 </html>
+```
